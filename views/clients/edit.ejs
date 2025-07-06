@@ -1,149 +1,221 @@
-<% const title = 'تعديل العميل'; %>
-<%- include('../layout', { title, body: `
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">تعديل العميل</h1>
-    <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="/clients" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-right"></i>
-            العودة للعملاء
-        </a>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">بيانات العميل</h5>
-            </div>
-            <div class="card-body">
-                <form method="POST" action="/clients/${client._id}?_method=PUT">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="fullName" class="form-label">الاسم الكامل <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="fullName" name="fullName" value="${client.fullName}" required>
-                        </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label for="mobileNumber" class="form-label">رقم الجوال <span class="text-danger">*</span></label>
-                            <input type="tel" class="form-control" id="mobileNumber" name="mobileNumber" value="${client.mobileNumber}" required>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="commissionRate" class="form-label">نسبة العمولة (%) <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" id="commissionRate" name="commissionRate" min="0" max="100" step="0.01" value="${client.commissionRate}" required>
-                        <div class="form-text">أدخل نسبة العمولة للعميل (مثال: 5 تعني 5%)</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="notes" class="form-label">الملاحظات</label>
-                        <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="ملاحظات إضافية حول العميل">${client.notes || ''}</textarea>
-                    </div>
-                    
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i>
-                            حفظ التعديلات
-                        </button>
-                        <a href="/clients" class="btn btn-outline-secondary">إلغاء</a>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تعديل العميل - نظام إدارة الفواتير</title>
     
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">معلومات العميل</h5>
+    <!-- Bootstrap RTL CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts - Arabic -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Light mode colors */
+            --bg-primary: #f8f9fa;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #e9ecef;
+            --text-primary: #333333;
+            --text-secondary: #6c757d;
+            --text-muted: #adb5bd;
+            --border-color: #e9ecef;
+            --shadow-color: rgba(0,0,0,0.1);
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-bg: #ffffff;
+            --input-bg: #ffffff;
+            --input-border: #e9ecef;
+        }
+
+        [data-theme="dark"] {
+            /* Dark mode colors */
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-tertiary: #2d2d2d;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --text-muted: #888888;
+            --border-color: #404040;
+            --shadow-color: rgba(0,0,0,0.3);
+            --primary-gradient: linear-gradient(135deg, #4a5568 0%, #553c9a 100%);
+            --card-bg: #2d2d2d;
+            --input-bg: #3d3d3d;
+            --input-border: #555555;
+        }
+        
+        * {
+            font-family: 'Cairo', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px var(--shadow-color);
+        }
+        
+        .card-header {
+            background-color: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        .form-control, .form-select {
+            background-color: var(--input-bg);
+            border: 2px solid var(--input-border);
+            color: var(--text-primary);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background-color: var(--input-bg);
+            border-color: #667eea;
+            color: var(--text-primary);
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        .form-text {
+            color: var(--text-muted);
+        }
+        
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 500;
+            color: white !important;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            color: white !important;
+        }
+        
+        .btn-outline-secondary {
+            color: var(--text-secondary);
+            border-color: var(--border-color);
+        }
+        
+        .btn-outline-secondary:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+        
+        .text-danger {
+            color: #dc3545 !important;
+        }
+        
+        [data-theme="dark"] .text-danger {
+            color: #ff6b6b !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">تعديل العميل</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <a href="/clients" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-right"></i>
+                    العودة للعملاء
+                </a>
             </div>
-            <div class="card-body">
-                <p><strong>تاريخ الإنشاء:</strong><br>${new Date(client.createdAt).toLocaleDateString('ar-EG')}</p>
-                <p><strong>آخر تحديث:</strong><br>${new Date(client.updatedAt).toLocaleDateString('ar-EG')}</p>
+        </div>
+
+        <!-- Flash messages -->
+        <% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <%= success %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+        
+        <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <%= error %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">بيانات العميل</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="/clients/<%= client._id %>?_method=PUT">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="fullName" class="form-label">الاسم الكامل <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="fullName" name="fullName" value="<%= client.fullName %>" required>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="mobileNumber" class="form-label">رقم الجوال <span class="text-danger">*</span></label>
+                                    <input type="tel" class="form-control" id="mobileNumber" name="mobileNumber" value="<%= client.mobileNumber %>" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="commissionRate" class="form-label">نسبة العمولة (%) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="commissionRate" name="commissionRate" min="0" max="100" step="0.01" value="<%= client.commissionRate %>" required>
+                                <div class="form-text">أدخل نسبة العمولة للعميل (مثال: 5 تعني 5%)</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="notes" class="form-label">الملاحظات</label>
+                                <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="ملاحظات إضافية حول العميل"><%= client.notes || '' %></textarea>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i>
+                                    حفظ التعديلات
+                                </button>
+                                <a href="/clients" class="btn btn-outline-secondary">إلغاء</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">معلومات العميل</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>تاريخ الإنشاء:</strong><br><%= new Date(client.createdAt).toLocaleDateString('ar-EG') %></p>
+                        <p><strong>آخر تحديث:</strong><br><%= new Date(client.updatedAt).toLocaleDateString('ar-EG') %></p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<style>
-/* Dark mode form styling */
-.form-control, .form-select {
-    background-color: var(--input-bg);
-    border: 2px solid var(--input-border);
-    color: var(--text-primary);
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-.form-control:focus, .form-select:focus {
-    background-color: var(--input-bg);
-    border-color: #667eea;
-    color: var(--text-primary);
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-}
-
-.form-control::placeholder {
-    color: var(--text-muted);
-}
-
-.form-label {
-    color: var(--text-primary);
-    font-weight: 500;
-}
-
-.form-text {
-    color: var(--text-muted);
-}
-
-.card {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-}
-
-.card-header {
-    background-color: var(--bg-tertiary);
-    border-bottom: 1px solid var(--border-color);
-    color: var(--text-primary);
-}
-
-.btn-outline-secondary {
-    color: var(--text-secondary);
-    border-color: var(--border-color);
-}
-
-.btn-outline-secondary:hover {
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-    border-color: var(--border-color);
-}
-
-/* Dark mode specific adjustments */
-[data-theme="dark"] .form-control,
-[data-theme="dark"] .form-select {
-    background-color: var(--input-bg);
-    border-color: var(--input-border);
-    color: var(--text-primary);
-}
-
-[data-theme="dark"] .form-control:focus,
-[data-theme="dark"] .form-select:focus {
-    background-color: var(--input-bg);
-    border-color: #667eea;
-    color: var(--text-primary);
-}
-
-[data-theme="dark"] .form-control::placeholder {
-    color: var(--text-muted);
-}
-
-[data-theme="dark"] .text-danger {
-    color: #ff6b6b !important;
-}
-
-[data-theme="dark"] p strong {
-    color: var(--text-primary);
-}
-</style>
-` }) %>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
